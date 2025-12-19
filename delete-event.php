@@ -20,9 +20,12 @@ if (!$data || empty($data['id'])) {
 
 $id = (int) $data['id'];
 
-$sql = "DELETE FROM events WHERE id = $id";
+$sql = "DELETE FROM events WHERE id = ?";
+$stmt = mysqli_prepare($conn, $sql);
 
-if (mysqli_query($conn, $sql)) {
+mysqli_stmt_bind_param($stmt, "i", $id);
+
+if (mysqli_stmt_execute($stmt)) {
     echo json_encode([
         "success" => true,
         "message" => "Event deleted successfully"
@@ -30,8 +33,9 @@ if (mysqli_query($conn, $sql)) {
 } else {
     echo json_encode([
         "success" => false,
-        "error" => mysqli_error($conn)
+        "error" => mysqli_stmt_error($stmt)
     ]);
 }
 
+mysqli_stmt_close($stmt);
 mysqli_close($conn);

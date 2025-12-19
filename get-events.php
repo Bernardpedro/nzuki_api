@@ -11,15 +11,51 @@ if (!$conn) {
     die(json_encode(["error" => "Database connection failed"]));
 }
 
-$sql = "SELECT * FROM events ORDER BY date DESC";
-$result = mysqli_query($conn, $sql);
+$sql = "SELECT id, title, description, date, time, location, type, status, organizer, youtubeLink, image, imageType, images FROM events ORDER BY date DESC";
+// $sql = "SELECT * FROM events ORDER BY date DESC";
+
+$stmt = mysqli_prepare($conn, $sql);
+// $result = mysqli_query($conn, $sql);
+
+mysqli_stmt_execute($stmt);
+
+mysqli_stmt_bind_result(
+    $stmt,
+    $id,
+    $title,
+    $description,
+    $date,
+    $time,
+    $location,
+    $type,
+    $status,
+    $organizer,
+    $youtubeLink,
+    $image,
+    $imageType,
+    $images
+);
+
+// $result = mysqli_stmt_get_result($stmt);
 
 $events = [];
 
-while ($row = mysqli_fetch_assoc($result)) {
-    // Convert images JSON back to array
-    $row['images'] = json_decode($row['images'], true);
-    $events[] = $row;
+while (mysqli_stmt_fetch($stmt)) {
+    $events[] = [
+            "id" => $id,
+            "title" => $title,
+            "description" => $description,
+            "date" => $date,
+            "time" => $time,
+            "location" => $location,
+            "type" => $type,
+            "status" => $status,
+            "organizer" => $organizer,
+            "youtubeLink" => $youtubeLink,
+            "image" => $image,
+            "imageType" => $imageType,
+            "images" => json_decode($images, true)
+        ];
 }
 
 echo json_encode([
@@ -27,4 +63,5 @@ echo json_encode([
     "data" => $events
 ]);
 
+mysqli_stmt_close($stmt);
 mysqli_close($conn);

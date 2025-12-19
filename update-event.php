@@ -20,37 +20,37 @@ if (!$data || empty($data['id'])) {
 
 $id = (int) $data['id'];
 
-$title       = mysqli_real_escape_string($conn, $data['title']);
-$description = mysqli_real_escape_string($conn, $data['description']);
-$date        = $data['date'];
 $time        = date("Y-m-d H:i:s", strtotime($data['time']));
-$location    = mysqli_real_escape_string($conn, $data['location']);
-$type        = mysqli_real_escape_string($conn, $data['type']);
-$status      = mysqli_real_escape_string($conn, $data['status']);
-$organizer   = mysqli_real_escape_string($conn, $data['organizer']);
-$youtubeLink = mysqli_real_escape_string($conn, $data['youtubeLink']);
-$image       = mysqli_real_escape_string($conn, $data['image']);
 $imageType   = mysqli_real_escape_string($conn, $data['imageType']);
-$images      = mysqli_real_escape_string($conn, json_encode($data['images']));
 
 $sql = "
 UPDATE events SET
-    title='$title',
-    description='$description',
-    date='$date',
-    time='$time',
-    location='$location',
-    type='$type',
-    status='$status',
-    organizer='$organizer',
-    youtubeLink='$youtubeLink',
-    image='$image',
-    imageType='$imageType',
-    images='$images'
-WHERE id=$id
+    title=?, description=?, date=?, time=?, location=?,
+    type=?, status=?, organizer=?, youtubeLink=?,
+    image=?, imageType=?, images=?
+WHERE id=?
 ";
 
-if (mysqli_query($conn, $sql)) {
+$stmt = mysqli_prepare($conn, $sql);
+
+mysqli_stmt_bind_param(
+   $stmt,
+    "ssssssssssssi",
+    $data['title'],
+    $data['description'],
+    $data['date'],
+    $time,
+    $data['location'],
+    $data['type'],
+    $data['status'],
+    $data['organizer'],
+    $data['youtubeLink'],
+    $data['image'],
+    $data['imageType'],
+    $images,
+    $data['id']);
+
+if (mysqli_stmt_execute($stmt)) {
     echo json_encode([
         "success" => true,
         "message" => "Event updated successfully"
@@ -62,4 +62,5 @@ if (mysqli_query($conn, $sql)) {
     ]);
 }
 
+mysqli_stmt_close($stmt);
 mysqli_close($conn);
