@@ -11,17 +11,31 @@ if (!$conn) {
     die(json_encode(["error" => "Database connection failed"]));
 }
 
-$sql = "SELECT id, title, description, date, time, location, type, status, organizer, youtubeLink, image, imageType, images FROM events ORDER BY date DESC";
-// $sql = "SELECT * FROM events ORDER BY date DESC";
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    die(json_encode(["success" => false, "error" => "Event ID is required"]));
+}
+
+$id = (int) $_GET['id'];
+
+$sql = "
+SELECT
+    id, title, description, date, time, location,
+    type, status, organizer, youtubeLink,
+    image, imageType, images
+FROM events
+WHERE id = ?
+LIMIT 1
+";
 
 $stmt = mysqli_prepare($conn, $sql);
-// $result = mysqli_query($conn, $sql);
+
+mysqli_stmt_bind_param($stmt, "i", $id);
 
 mysqli_stmt_execute($stmt);
 
 mysqli_stmt_bind_result(
     $stmt,
-    $id,
+    $eventId,
     $title,
     $description,
     $date,
@@ -36,13 +50,12 @@ mysqli_stmt_bind_result(
     $images
 );
 
-$result = mysqli_stmt_get_result($stmt);
+if (mysqli_stmt_fetch($stmt)) {
 
-$events = [];
-
-while (mysqli_stmt_fetch($stmt)) {
-    $events[] = [
-            "id" => $id,
+    echo json_encode([
+        "success" => true,
+        "data" => [
+            "id" => $eventId,
             "title" => $title,
             "description" => $description,
             "date" => $date,
@@ -55,13 +68,15 @@ while (mysqli_stmt_fetch($stmt)) {
             "image" => $image,
             "imageType" => $imageType,
             "images" => json_decode($images, true)
-        ];
-}
+        ]
+    ]);
 
-echo json_encode([
-    "success" => true,
-    "data" => $events
-]);
+} else {
+    echo json_encode([
+        "success" => false,
+        "message" => "Event not found"
+    ]);
+}
 
 mysqli_stmt_close($stmt);
 mysqli_close($conn);
