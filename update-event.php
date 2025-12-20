@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__ . "/middleware/auth.php";
+
 $host = "localhost";
 $user = "root";
 $pass = "";

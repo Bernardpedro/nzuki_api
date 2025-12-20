@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . "/middleware/auth.php";
 
 // Database connection
 $host = "localhost";
