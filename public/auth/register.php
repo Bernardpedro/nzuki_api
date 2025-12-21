@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . "/vendor/autoload.php";
+require __DIR__ . "/../../vendor/autoload.php";
 
 $conn = mysqli_connect("localhost", "root", "", "nzuki_db");
 if (!$conn) {
