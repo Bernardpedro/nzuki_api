@@ -1,10 +1,19 @@
 <?php
-
 require __DIR__ . "/../../vendor/autoload.php";
 require __DIR__ . "/../../config/jwt.php";
 
-
 use Firebase\JWT\JWT;
+
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
+    http_response_code(200);
+    exit;
+}
+
 
 $conn = mysqli_connect("localhost", "root", "", "nzuki_db");
 if (!$conn) {
@@ -36,10 +45,12 @@ if (mysqli_stmt_fetch($stmt) && password_verify($password, $hashedPassword)){
 
      echo json_encode([
         "success" => true,
+        "message" => "Login successful",
         "token" => $token
     ]);
 
   }else {
+    http_response_code(401);
     echo json_encode([
         "success" => false,
         "message" => "Invalid credentials"

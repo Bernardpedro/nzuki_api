@@ -6,14 +6,33 @@ require __DIR__ . "/../config/jwt.php";
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
+$authHeader = null;
 
-$headers = getallheaders();
-
-if (!isset($headers['Authorization'])) {
-    die(json_encode(["error" => "Token missing"]));
+if (isset($_SERVER['HTTP_AUTHORIZATION'])){
+     $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])){
+     $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+} else {
+        $headers = getallheaders();
+        if (isset($headers['Authorization'])){
+            $authHeader = $headers['Authorization'];
+        } else if (isset($headers['authorization'])){
+            $authHeader = $headers['authorization'];
+        }
 }
 
-$token = str_replace("Bearer ", "", $headers['Authorization']);
+if (!$authHeader) {
+    echo json_encode(["error" => "Token missing"]);
+    exit;
+}
+
+            // $headers = getallheaders();
+
+            // if (!isset($headers['Authorization'])) {
+            //     die(json_encode(["error" => "Token missing"]));
+            // }
+
+$token = str_replace("Bearer ", "", $authHeader);
 
 try {
     $decoded = JWT::decode($token, new Key($JWT_SECRET, 'HS256'));
