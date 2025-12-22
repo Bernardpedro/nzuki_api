@@ -24,39 +24,42 @@ if (!$conn) {
     die("Database connection failed: " . mysqli_connect_error());
 }
 
-// Get raw JSON input
-$json = file_get_contents("php://input");
-
-if (!$json) {
-    die("No JSON received");
-}
-
-// Decode JSON to associative array
-$data = json_decode($json, true);
-
-if (!$data) {
-    die("Invalid JSON");
-}
-
 // Prepare values
-$title        = mysqli_real_escape_string($conn, $data['title']);
-$description  = mysqli_real_escape_string($conn, $data['description']);
-$date         = $data['date'];
-$time         = date("Y-m-d H:i:s", strtotime($data['time']));
-// $time      = date("Y-m-d H:i:s", strtotime($data['time']));
-$location     = mysqli_real_escape_string($conn, $data['location']);
-$type         = mysqli_real_escape_string($conn, $data['type']);
-$status       = mysqli_real_escape_string($conn, $data['status']);
-$organizer    = mysqli_real_escape_string($conn, $data['organizer']);
-$youtubeLink  = mysqli_real_escape_string($conn, $data['youtubeLink']);
-$image        = mysqli_real_escape_string($conn, $data['image']);
-$imageType    = mysqli_real_escape_string($conn, $data['imageType']);
-// $images       = mysqli_real_escape_string($conn, json_encode($data['images']));
-$images = json_encode($data['images']);
 
+$title        = mysqli_real_escape_string($conn, $_POST['title'] ?? '');
+$description  = mysqli_real_escape_string($conn, $_POST['description'] ?? '');
+$date         = $_POST['date'] ?? '';
+$time = $_POST['time'] ?? '';
+$location     = mysqli_real_escape_string($conn, $_POST['location'] ?? '');
+$type         = mysqli_real_escape_string($conn, $_POST['type'] ?? '');
+$status       = mysqli_real_escape_string($conn, $_POST['status'] ?? '');
+$organizer    = mysqli_real_escape_string($conn, $_POST['organizer'] ?? '');
+$youtubeLink  = mysqli_real_escape_string($conn, $_POST['youtubeLink'] ?? '');
 
+$imagePath = null;
+$imageType = null;
 
+if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
 
+       $uploadDir = __DIR__ . "/../../uploads/events/";
+
+         if (!is_dir($uploadDir)) {
+              mkdir($uploadDir, 0755, true);
+         }
+
+         
+        $imageType = mime_content_type($_FILES['image']['tmp_name']);
+        $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+
+        $fileName = uniqid("event_", true) . "." . $extension;
+        $filePath = $uploadDir . $fileName;
+
+          if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
+        $imagePath = "uploads/events/" . $fileName;
+    }
+}
+
+$images = json_encode([]);
 
 
 // Insert query
@@ -70,22 +73,21 @@ $stmt = mysqli_prepare($conn, $sql);
 
 
 mysqli_stmt_bind_param(
+
     $stmt,
     "ssssssssssss",
-    $data['title'],
-    $data['description'],
-    $data['date'],
+    $title,
+    $description,
+    $date,
     $time,
-    // date("Y-m-d H:i:s", strtotime($data['time'])),
-    $data['location'],
-    $data['type'],
-    $data['status'],
-    $data['organizer'],
-    $data['youtubeLink'],
-    $data['image'],
-    $data['imageType'],
+    $location,
+    $type,
+    $status,
+    $organizer,
+    $youtubeLink,
+    $imagePath,
+    $imageType,
     $images
-    // json_encode($data['images'])
 );
 
 if (mysqli_stmt_execute($stmt)) {
@@ -96,7 +98,7 @@ if (mysqli_stmt_execute($stmt)) {
 } else {
     echo json_encode([
         "success" => false,
-        "error" => mysqli_error($conn)
+        "message" => mysqli_error($conn)
     ]);
 }
 
