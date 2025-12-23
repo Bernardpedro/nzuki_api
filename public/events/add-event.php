@@ -59,7 +59,39 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
     }
 }
 
-$images = json_encode([]);
+// $images = json_encode([]);
+
+// Handle multiple images
+
+$imagesArray = [];
+
+if (isset($_FILES['images'])) {
+
+    $uploadDir = __DIR__ . "/../../uploads/events/";
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    foreach ($_FILES['images']['tmp_name'] as $index => $tmpName) {
+        
+        if ($_FILES['images']['error'][$index] !== 0) {
+            continue;
+        }
+
+        $mimeType = mime_content_type($tmpName);
+        $extension = pathinfo($_FILES['images']['name'][$index], PATHINFO_EXTENSION);
+
+        $fileName = uniqid("event_gallery_", true) . "." . $extension;
+        $filePath = $uploadDir . $fileName;
+
+         if (move_uploaded_file($tmpName, $filePath)) {
+             $imagesArray[] = "uploads/events/" . $fileName;
+         }
+    }
+}
+
+$images = json_encode($imagesArray);
+
 
 
 // Insert query
@@ -93,7 +125,7 @@ mysqli_stmt_bind_param(
 if (mysqli_stmt_execute($stmt)) {
     echo json_encode([
         "success" => true,
-        "message" => "Event saved successfully"
+        "message" => "Event saved fff successfully"
     ]);
 } else {
     echo json_encode([

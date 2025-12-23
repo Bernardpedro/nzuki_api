@@ -1,3 +1,5 @@
 # Composer dependencies
-# /vendor/
+/vendor/
+# User uploaded files - not tracked in version control
+/public/uploads/
    
