@@ -36,28 +36,28 @@ $status       = mysqli_real_escape_string($conn, $_POST['status'] ?? '');
 $organizer    = mysqli_real_escape_string($conn, $_POST['organizer'] ?? '');
 $youtubeLink  = mysqli_real_escape_string($conn, $_POST['youtubeLink'] ?? '');
 
-$imagePath = null;
-$imageType = null;
+// $imagePath = null;
+// $imageType = null;
 
-if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+// if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
 
-       $uploadDir = __DIR__ . "/../../uploads/events/";
+//        $uploadDir = __DIR__ . "/../../uploads/events/";
 
-         if (!is_dir($uploadDir)) {
-              mkdir($uploadDir, 0755, true);
-         }
+//          if (!is_dir($uploadDir)) {
+//               mkdir($uploadDir, 0755, true);
+//          }
 
          
-        $imageType = mime_content_type($_FILES['image']['tmp_name']);
-        $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+//         $imageType = mime_content_type($_FILES['image']['tmp_name']);
+//         $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
 
-        $fileName = uniqid("event_", true) . "." . $extension;
-        $filePath = $uploadDir . $fileName;
+//         $fileName = uniqid("event_", true) . "." . $extension;
+//         $filePath = $uploadDir . $fileName;
 
-          if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
-        $imagePath = "uploads/events/" . $fileName;
-    }
-}
+//           if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
+//         $imagePath = "uploads/events/" . $fileName;
+//     }
+// }
 
 // $images = json_encode([]);
 
@@ -98,8 +98,8 @@ $images = json_encode($imagesArray);
 $sql = "
 INSERT INTO events (
     title, description, date, time, location,
-    type, status, organizer, youtubeLink, image, imageType, images
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    type, status, organizer, youtubeLink, imageType, images
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = mysqli_prepare($conn, $sql);
 
@@ -107,7 +107,7 @@ $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param(
 
     $stmt,
-    "ssssssssssss",
+    "sssssssssss",
     $title,
     $description,
     $date,
@@ -117,7 +117,7 @@ mysqli_stmt_bind_param(
     $status,
     $organizer,
     $youtubeLink,
-    $imagePath,
+    // $imagePath,
     $imageType,
     $images
 );
