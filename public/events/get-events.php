@@ -1,5 +1,15 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
+    http_response_code(200);
+    exit;
+}
+
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -12,10 +22,10 @@ if (!$conn) {
 }
 
 $page  = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 5;
+$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;
 
 if ($page < 1)  $page = 1;
-if ($limit < 1) $limit = 5;
+if ($limit < 1) $limit = 100;
 
 $offset = ($page - 1) * $limit;
 
@@ -31,8 +41,8 @@ mysqli_stmt_close($countStmt);
 
 $sql = "SELECT
           id, title, description, date, time, location,
-           type, status, organizer, youtubeLink,
-            image, imageType, images 
+            type, status, organizer, youtubeLink,
+            imageType, images 
         FROM events 
         ORDER BY date DESC
         LIMIT ? OFFSET ?";
@@ -53,7 +63,6 @@ mysqli_stmt_bind_result(
     $status,
     $organizer,
     $youtubeLink,
-    $image,
     $imageType,
     $images
 );
@@ -74,7 +83,6 @@ while (mysqli_stmt_fetch($stmt)) {
             "status" => $status,
             "organizer" => $organizer,
             "youtubeLink" => $youtubeLink,
-            "image" => $image,
             "imageType" => $imageType,
             "images" => json_decode($images, true)
         ];

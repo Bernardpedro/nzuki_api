@@ -21,7 +21,7 @@ $sql = "
 SELECT
     id, title, description, date, time, location,
     type, status, organizer, youtubeLink,
-    image, imageType, images
+    imageType, images
 FROM events
 WHERE id = ?
 LIMIT 1
@@ -45,7 +45,6 @@ mysqli_stmt_bind_result(
     $status,
     $organizer,
     $youtubeLink,
-    $image,
     $imageType,
     $images
 );
@@ -65,7 +64,6 @@ if (mysqli_stmt_fetch($stmt)) {
             "status" => $status,
             "organizer" => $organizer,
             "youtubeLink" => $youtubeLink,
-            "image" => $image,
             "imageType" => $imageType,
             "images" => json_decode($images, true)
         ]
