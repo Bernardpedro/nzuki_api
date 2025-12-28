@@ -1,5 +1,15 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
+    http_response_code(200);
+    exit;
+}
+
 require __DIR__ . "/../../middleware/auth.php";
 
 $host = "localhost";
@@ -13,15 +23,40 @@ if (!$conn) {
     die(json_encode(["error" => "Database connection failed"]));
 }
 
-$json = file_get_contents("php://input");
-$data = json_decode($json, true);
-
-if (!$data || empty($data['id'])) {
-    die(json_encode(["error" => "Event ID is required"]));
+if (!isset($_POST['id']) || empty($_POST['id'])) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Event ID is required"]);
+    exit;
 }
 
-$id = (int) $data['id'];
+$id = (int) $_POST['id'];
 
+    //Get images paths BEFORE deleting event
+    $sql = "SELECT images FROM events WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+        
+    $event = mysqli_fetch_assoc($result);
+
+    mysqli_stmt_close($stmt);
+
+    if (!$event) {
+    http_response_code(404);
+    echo json_encode(["success" => false, "message" => "Event not found"]);
+    exit;
+}
+
+//delete images from files 
+if (!$event) {
+    http_response_code(404);
+    echo json_encode(["success" => false, "message" => "Event not found"]);
+    exit;
+}
+
+// Delete event row:
+// Prepared statement 
 $sql = "DELETE FROM events WHERE id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 
