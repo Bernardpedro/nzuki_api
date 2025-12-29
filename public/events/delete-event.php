@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
 }
 
 require __DIR__ . "/../../middleware/auth.php";
+requireRole(['admin']);
 
 $host = "localhost";
 $user = "root";

@@ -25,20 +25,22 @@ $data = json_decode(file_get_contents("php://input"), true);
 $email = $data['email'];
 $password = $data['password'];
 
-$sql = "SELECT id, password FROM users WHERE email = ?";
+// $sql = "SELECT id, password FROM users WHERE email = ?";
+$sql = "SELECT id, password, role FROM users WHERE email = ?";
 
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "s", $email);
 mysqli_stmt_execute($stmt);
 
-mysqli_stmt_bind_result($stmt, $id, $hashedPassword);
+mysqli_stmt_bind_result($stmt, $id, $hashedPassword, $role);
 
 if (mysqli_stmt_fetch($stmt) && password_verify($password, $hashedPassword)){
     $payload = [
         "iss" => $JWT_ISSUER,
         "iat" => time(),
         "exp" => $JWT_EXPIRE,
-        "user_id" => $id
+        "user_id" => $id,
+        "role" => $role
     ];
 
      $token = JWT::encode($payload, $JWT_SECRET, 'HS256');
@@ -46,7 +48,8 @@ if (mysqli_stmt_fetch($stmt) && password_verify($password, $hashedPassword)){
      echo json_encode([
         "success" => true,
         "message" => "Login successful",
-        "token" => $token
+        "token" => $token,
+        "role" => $role
     ]);
 
   }else {
