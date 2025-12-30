@@ -15,10 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
 }
 
 
-$conn = mysqli_connect("localhost", "root", "", "nzuki_db");
-if (!$conn) {
-    die(json_encode(["error" => "DB connection failed"]));
-}
+include("../connection.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -26,13 +23,13 @@ $email = $data['email'];
 $password = $data['password'];
 
 // $sql = "SELECT id, password FROM users WHERE email = ?";
-$sql = "SELECT id, password, role FROM users WHERE email = ?";
+$sql = "SELECT id, name, password, role FROM users WHERE email = ?";
 
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "s", $email);
 mysqli_stmt_execute($stmt);
 
-mysqli_stmt_bind_result($stmt, $id, $hashedPassword, $role);
+mysqli_stmt_bind_result($stmt, $id, $name, $hashedPassword, $role);
 
 if (mysqli_stmt_fetch($stmt) && password_verify($password, $hashedPassword)){
     $payload = [
@@ -47,6 +44,7 @@ if (mysqli_stmt_fetch($stmt) && password_verify($password, $hashedPassword)){
 
      echo json_encode([
         "success" => true,
+        "name" => $name,
         "message" => "Login successful",
         "token" => $token,
         "role" => $role

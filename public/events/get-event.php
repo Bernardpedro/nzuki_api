@@ -1,15 +1,6 @@
 <?php
 
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "nzuki_db";
-
-$conn = mysqli_connect($host, $user, $pass, $db);
-
-if (!$conn) {
-    die(json_encode(["error" => "Database connection failed"]));
-}
+include("../connection.php");
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     die(json_encode(["success" => false, "error" => "Event ID is required"]));

@@ -12,17 +12,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
 
 require __DIR__ . "/../../middleware/auth.php";
 
+include("../connection.php");
+
 // Database connection
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "nzuki_db";
+// $host = "localhost";
+// $user = "root";
+// $pass = "";
+// $db   = "nzuki_db";
 
-$conn = mysqli_connect($host, $user, $pass, $db);
+// $conn = mysqli_connect($host, $user, $pass, $db);
 
-if (!$conn) {
-    die("Database connection failed: " . mysqli_connect_error());
-}
+// if (!$conn) {
+//     die("Database connection failed: " . mysqli_connect_error());
+// }
 
 // Prepare values
 

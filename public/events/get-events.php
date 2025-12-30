@@ -10,16 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
     exit;
 }
 
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "nzuki_db";
-
-$conn = mysqli_connect($host, $user, $pass, $db);
-
-if (!$conn) {
-    die(json_encode(["error" => "Database connection failed"]));
-}
+include("../connection.php");
 
 $page  = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;

@@ -13,16 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
 require __DIR__ . "/../../middleware/auth.php";
 requireRole(['admin']);
 
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "nzuki_db";
-
-$conn = mysqli_connect($host, $user, $pass, $db);
-
-if (!$conn) {
-    die(json_encode(["error" => "Database connection failed"]));
-}
+include("../connection.php");
 
 if (!isset($_POST['id']) || empty($_POST['id'])) {
     http_response_code(400);

@@ -13,10 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
 
 require __DIR__ . "/../../vendor/autoload.php";
 
-$conn = mysqli_connect("localhost", "root", "", "nzuki_db");
-if (!$conn) {
-    die(json_encode(["error" => "DB connection failed"]));
-}
+include("../connection.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 if (!$data) {
