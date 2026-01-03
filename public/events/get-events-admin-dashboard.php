@@ -35,8 +35,7 @@ mysqli_stmt_close($countStmt);
 
 $sql = "SELECT
           id, title, description, date, time, location,
-            type, status, organizer, youtubeLink,
-            imageType, images 
+            type, status, organizer, youtubeLink, images 
         FROM events 
         ORDER BY date DESC
         LIMIT ? OFFSET ?";
@@ -57,7 +56,6 @@ mysqli_stmt_bind_result(
     $status,
     $organizer,
     $youtubeLink,
-    $imageType,
     $images
 );
 
@@ -77,7 +75,6 @@ while (mysqli_stmt_fetch($stmt)) {
             "status" => $status,
             "organizer" => $organizer,
             "youtubeLink" => $youtubeLink,
-            "imageType" => $imageType,
             "images" => json_decode($images, true)
         ];
 }

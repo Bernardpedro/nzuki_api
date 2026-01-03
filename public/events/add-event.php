@@ -14,23 +14,12 @@ require __DIR__ . "/../../middleware/auth.php";
 
 include("../connection.php");
 
-// Database connection
-// $host = "localhost";
-// $user = "root";
-// $pass = "";
-// $db   = "nzuki_db";
-
-// $conn = mysqli_connect($host, $user, $pass, $db);
-
-// if (!$conn) {
-//     die("Database connection failed: " . mysqli_connect_error());
-// }
 
 // Prepare values
 
 $title        = mysqli_real_escape_string($conn, $_POST['title'] ?? '');
 $description  = mysqli_real_escape_string($conn, $_POST['description'] ?? '');
-$date         = $_POST['date'] ?? '';
+$date         = $_POST['date'] ?? null;
 $time = $_POST['time'] ?? '';
 $location     = mysqli_real_escape_string($conn, $_POST['location'] ?? '');
 $type         = mysqli_real_escape_string($conn, $_POST['type'] ?? '');
@@ -38,30 +27,6 @@ $status       = mysqli_real_escape_string($conn, $_POST['status'] ?? '');
 $organizer    = mysqli_real_escape_string($conn, $_POST['organizer'] ?? '');
 $youtubeLink  = mysqli_real_escape_string($conn, $_POST['youtubeLink'] ?? '');
 
-// $imagePath = null;
-// $imageType = null;
-
-// if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-
-//        $uploadDir = __DIR__ . "/../../uploads/events/";
-
-//          if (!is_dir($uploadDir)) {
-//               mkdir($uploadDir, 0755, true);
-//          }
-
-         
-//         $imageType = mime_content_type($_FILES['image']['tmp_name']);
-//         $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-
-//         $fileName = uniqid("event_", true) . "." . $extension;
-//         $filePath = $uploadDir . $fileName;
-
-//           if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
-//         $imagePath = "uploads/events/" . $fileName;
-//     }
-// }
-
-// $images = json_encode([]);
 
 // Handle multiple images
 
@@ -94,13 +59,48 @@ if (isset($_FILES['images'])) {
 
 $images = json_encode($imagesArray);
 
+// Handle multiple videos
+$videosArray = [];
+
+if (isset($_FILES['videos'])) {
+
+    $videoUploadDir = __DIR__ . "/../../uploads/events/videos/";
+    if (!is_dir($videoUploadDir)) {
+        mkdir($videoUploadDir, 0755, true);
+    }
+
+    foreach ($_FILES['videos']['tmp_name'] as $index => $tmpName) {
+
+        if ($_FILES['videos']['error'][$index] !== 0) {
+            continue;
+        }
+
+        // Validate MIME type
+        $allowedVideos = ['video/mp4', 'video/webm', 'video/ogg'];
+        $mimeType = mime_content_type($tmpName);
+
+        if (!in_array($mimeType, $allowedVideos)) {
+            continue;
+        }
+
+        $extension = pathinfo($_FILES['videos']['name'][$index], PATHINFO_EXTENSION);
+        $fileName = uniqid("event_video_", true) . "." . $extension;
+        $filePath = $videoUploadDir . $fileName;
+
+        if (move_uploaded_file($tmpName, $filePath)) {
+            $videosArray[] = "uploads/events/videos/" . $fileName;
+        }
+    }
+}
+
+$videos = json_encode($videosArray);
 
 
 // Insert query
 $sql = "
 INSERT INTO events (
     title, description, date, time, location,
-    type, status, organizer, youtubeLink, imageType, images
+    type, status, organizer, youtubeLink, images, videos
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = mysqli_prepare($conn, $sql);
@@ -119,22 +119,24 @@ mysqli_stmt_bind_param(
     $status,
     $organizer,
     $youtubeLink,
-    // $imagePath,
-    $imageType,
-    $images
+    $images,
+    $videos
 );
+try {
+    mysqli_stmt_execute($stmt);
 
-if (mysqli_stmt_execute($stmt)) {
     echo json_encode([
         "success" => true,
-        "message" => "Event saved fff successfully"
+        "message" => "Event saved successfully"
     ]);
-} else {
+} catch (mysqli_sql_exception $e) {
+    http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => mysqli_error($conn)
+        "message" => $e->getMessage()
     ]);
 }
+
 
 mysqli_stmt_close($stmt);
 mysqli_close($conn);

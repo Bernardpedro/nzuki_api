@@ -2,9 +2,9 @@
 
 // Database connection
 $host = "localhost";
-$user = "root12";
+$user = "root";
 $pass = "";
-$db   = "nzuki_db";
+$db="nzuki_db";                                                                                               
 
 try {
   $conn = mysqli_connect($host, $user, $pass, $db);

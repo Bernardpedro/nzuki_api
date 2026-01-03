@@ -22,7 +22,7 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])){
 }
 
 if (!$authHeader) {
-    echo json_encode(["error" => "Token missing"]);
+    echo json_encode(["error" => "Token j missing"]);
     exit;
 }
 
