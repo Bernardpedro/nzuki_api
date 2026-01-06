@@ -59,49 +59,13 @@ if (isset($_FILES['images'])) {
 
 $images = json_encode($imagesArray);
 
-// Handle multiple videos
-$videosArray = [];
-
-if (isset($_FILES['videos'])) {
-
-    $videoUploadDir = __DIR__ . "/../../uploads/events/videos/";
-    if (!is_dir($videoUploadDir)) {
-        mkdir($videoUploadDir, 0755, true);
-    }
-
-    foreach ($_FILES['videos']['tmp_name'] as $index => $tmpName) {
-
-        if ($_FILES['videos']['error'][$index] !== 0) {
-            continue;
-        }
-
-        // Validate MIME type
-        $allowedVideos = ['video/mp4', 'video/webm', 'video/ogg'];
-        $mimeType = mime_content_type($tmpName);
-
-        if (!in_array($mimeType, $allowedVideos)) {
-            continue;
-        }
-
-        $extension = pathinfo($_FILES['videos']['name'][$index], PATHINFO_EXTENSION);
-        $fileName = uniqid("event_video_", true) . "." . $extension;
-        $filePath = $videoUploadDir . $fileName;
-
-        if (move_uploaded_file($tmpName, $filePath)) {
-            $videosArray[] = "uploads/events/videos/" . $fileName;
-        }
-    }
-}
-
-$videos = json_encode($videosArray);
-
 
 // Insert query
 $sql = "
 INSERT INTO events (
     title, description, date, time, location,
-    type, status, organizer, youtubeLink, images, videos
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    type, status, organizer, youtubeLink, images
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = mysqli_prepare($conn, $sql);
 
@@ -109,7 +73,7 @@ $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param(
 
     $stmt,
-    "sssssssssss",
+    "ssssssssss",
     $title,
     $description,
     $date,
@@ -119,8 +83,7 @@ mysqli_stmt_bind_param(
     $status,
     $organizer,
     $youtubeLink,
-    $images,
-    $videos
+    $images
 );
 try {
     mysqli_stmt_execute($stmt);

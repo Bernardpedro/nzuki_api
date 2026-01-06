@@ -54,6 +54,7 @@ if ($existingImages === null) {
     $imagesArray = [];
     foreach ($existingImages as $imgUrl) {
         $path = str_replace("http://localhost/nzuki-api/", "", $imgUrl);
+        $path = str_replace("https://api.stjosephtssnzuki.com/", "", $path);
         $imagesArray[] = $path;
     }
 }
