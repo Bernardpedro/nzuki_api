@@ -28,6 +28,8 @@ $organizer    = mysqli_real_escape_string($conn, $_POST['organizer'] ?? '');
 $youtubeLink  = mysqli_real_escape_string($conn, $_POST['youtubeLink'] ?? '');
 
 
+
+
 // Handle multiple images
 
 $imagesArray = [];
